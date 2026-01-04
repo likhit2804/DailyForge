@@ -1,0 +1,214 @@
+import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useAppContext } from '../../context/AppContext';
+import EmptyState from '../../shared/components/EmptyState';
+import '../../styles.css'; // Import shared CSS
+
+const Dashboard = () => {
+  const { habits, expenses, categories, tasks, graphSpan, setGraphSpan, filterBySpan, totalExpenses, avgStreak } = useAppContext();
+
+  // Calculate dynamic stats based on graphSpan
+  const filteredExpenses = filterBySpan(expenses);
+  const tasksAdded = Object.values(tasks).reduce((sum, list) => sum + list.length, 0);
+  const thisPeriodExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const thisPeriodHabits = habits.length; // Habits are not filtered by date, so show total
+  const thisPeriodAvgStreak = avgStreak; // Average streak is overall
+  const mostExpensiveCategory = filteredExpenses.length ? filteredExpenses.reduce((a, b) => Math.abs(a.amount) > Math.abs(b.amount) ? a : b).category : '-';
+  const longestHabitStreak = habits.length ? Math.max(...habits.map(h => h.streak ?? 0)) : 0;
+
+  // Chart data: prefer explicit categories, but fall back to categories found in expenses
+  const chartCategories = (Array.isArray(categories) && categories.length > 0)
+    ? categories
+    : Array.from(new Set(filteredExpenses.map(e => e.category))).map(name => ({ name, color: '#cbd5e0', budget: 0 }));
+
+  const chartData = chartCategories.map(cat => ({
+    category: cat.name,
+    amount: filteredExpenses.filter(e => e.category === cat.name).reduce((sum, e) => sum + Math.abs(e.amount || 0), 0)
+  }));
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#f8f9fa', padding: '24px' }}>
+      <div style={{ width: '100%', maxWidth: '2000px', margin: '0 auto' }}>
+        <div className="section-card" style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h1 style={{ fontSize: '32px', fontWeight: '800', margin: '0 0 8px 0', color: '#1f2937' }}>
+                📊 Dashboard
+              </h1>
+              <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+                Overview of your habits and expenses
+              </p>
+            </div>
+            <div className="d-flex gap-2 align-items-center">
+              <span style={{ fontSize: '12px', color: '#6b7280' }}>Time period:</span>
+              <button
+                type="button"
+                className={`btn btn-sm ${graphSpan === 'week' ? 'btn-custom-primary' : 'btn-outline-primary'}`}
+                onClick={() => setGraphSpan('week')}
+              >
+                Week
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${graphSpan === 'month' ? 'btn-custom-primary' : 'btn-outline-primary'}`}
+                onClick={() => setGraphSpan('month')}
+              >
+                Month
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${graphSpan === 'year' ? 'btn-custom-primary' : 'btn-outline-primary'}`}
+                onClick={() => setGraphSpan('year')}
+              >
+                Year
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${graphSpan === 'all' ? 'btn-custom-primary' : 'btn-outline-primary'}`}
+                onClick={() => setGraphSpan('all')}
+              >
+                All
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="row g-3 mb-4">
+          <div className="col-md-4">
+            <div className="stat-card shadow h-100">
+              <div className="card-body text-center">
+                <p className="stat-label mb-2">Current Streak</p>
+                <div className="stat-value">{thisPeriodAvgStreak}</div>
+                <p className="stat-sublabel">days average</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="stat-card shadow h-100">
+              <div className="card-body text-center">
+                <p className="stat-label mb-2">This Period</p>
+                <div className="stat-value">₹{thisPeriodExpenses}</div>
+                <p className="stat-sublabel">net expenses</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="stat-card shadow h-100">
+              <div className="card-body text-center">
+                <p className="stat-label mb-2">Habits Tracked</p>
+                <div className="stat-value">{thisPeriodHabits}</div>
+                <p className="stat-sublabel">total habits</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="row g-3 mb-4">
+          <div className="col-md-4">
+            <div className="stat-card shadow h-100">
+              <div className="card-body text-center">
+                <p className="stat-label mb-2">Most Expensive Category</p>
+                <div className="stat-value" style={{ fontSize: '20px' }}>{mostExpensiveCategory}</div>
+                <p className="stat-sublabel">in selected period</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="stat-card shadow h-100">
+              <div className="card-body text-center">
+                <p className="stat-label mb-2">Longest Habit Streak</p>
+                <div className="stat-value">{longestHabitStreak}</div>
+                <p className="stat-sublabel">best streak (days)</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="stat-card shadow h-100">
+              <div className="card-body text-center">
+                <p className="stat-label mb-2">Matrix Tasks</p>
+                <div className="stat-value">{tasksAdded}</div>
+                <p className="stat-sublabel">total across quadrants</p>
+              </div>
+            </div>
+          </div>
+        </div>
+       
+        <div className="section-card">
+          <div>
+            <h2 className="section-title">
+              <span className="badge bg-primary rounded-pill p-2">✨</span>
+              Today's Habits
+            </h2>
+            {habits.length === 0 ? (
+              <EmptyState icon="✨" title="No habits yet" subtitle="Add habits to start tracking your progress." actionLabel="Add Habit" />
+            ) : (
+              habits.slice(0, 3).map(habit => (
+                <div key={habit.id} className="task-item p-3 mb-2 rounded">
+                  <div>
+                    <h3 className="h5 mb-1">{habit.name}</h3>
+                    <p className="habit-streak mb-0">🔥 {habit.streak ?? 0} day streak</p>
+                  </div>
+                  <div className="d-flex gap-1">
+                    {habit.completed.map((done, i) => (
+                      <div key={i} className={`habit-day ${done ? 'completed' : ''}`}>
+                        {done ? '✓' : '—'}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+        <div className="section-card mt-3">
+          <div>
+            <h2 className="section-title">
+              <span className="badge bg-success rounded-pill p-2">💰</span>
+              Recent Expenses
+            </h2>
+            {filteredExpenses.length === 0 ? (
+              <EmptyState icon="💸" title="No expenses" subtitle="You don't have any expenses for this period." actionLabel="Add Expense" />
+            ) : (
+              filteredExpenses.slice(0, 3).map(expense => (
+                <div key={expense.id} className="task-item p-3 mb-2 rounded" style={{borderLeft: `6px solid ${categories.find(c => c.name === expense.category)?.color || '#e2e8f0'}`}}>
+                  <div>
+                    <div className="fw-bold">{expense.category}</div>
+                    <div className="text-muted small">{expense.date}</div>
+                  </div>
+                  <div className="fw-bold fs-5">₹{expense.amount}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+        <div className="section-card mt-3">
+          <div>
+            <h2 className="section-title">
+              <span className="badge bg-secondary rounded-pill p-2">📉</span>
+              Spending by Category
+            </h2>
+            {chartData.filter(d => d.amount > 0).length === 0 ? (
+              <EmptyState
+                icon="📉"
+                title="No spending data"
+                subtitle="Add expenses to see category-wise trends for this period."
+              />
+            ) : (
+              <div style={{ width: '100%', height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 16, right: 16, left: 0, bottom: 0 }}>
+                    <XAxis dataKey="category" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={60} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip formatter={(value) => [`₹${value}`, 'Amount']} />
+                    <Bar dataKey="amount" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
