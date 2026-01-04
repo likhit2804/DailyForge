@@ -4,13 +4,11 @@ const API_BASE = '/api';
 
 // Helper to build a correct full URL regardless of leading/trailing slashes
 const buildUrl = (endpoint) => `${API_BASE}${endpoint && endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
-console.log('🚀 API_BASE set to:', API_BASE);
 
 // CSRF token handling
 const getCSRFToken = () => {
   const name = 'csrftoken';
   let cookieValue = null;
-  console.log('🔍 Looking for CSRF cookie...');
   if (document.cookie && document.cookie !== '') {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
@@ -22,7 +20,6 @@ const getCSRFToken = () => {
       }
     }
   }
-  if (!cookieValue) console.log('⚠️ No CSRF cookie found');
   return cookieValue;
 };
 
@@ -30,20 +27,13 @@ const getCSRFToken = () => {
 const initializeCSRF = async () => {
   try {
     const url = buildUrl('/auth/csrf/');
-    console.log('➡️ initializeCSRF ->', url);
     const response = await fetch(url, {
       method: 'GET',
       credentials: 'include',
     });
-    console.log('⬅️ initializeCSRF status:', response.status);
     // log response headers (CORS related)
     try { console.log('headers:', Object.fromEntries(response.headers.entries())); } catch (e) {}
-    if (response.ok) {
-      console.log('✅ CSRF token initialized (server set cookie if configured)');
-      console.log('📥 document.cookie after init:', document.cookie);
-    } else {
-      console.warn('❌ Failed to initialize CSRF token, status:', response.status);
-    }
+    
   } catch (error) {
     console.warn('CSRF initialization error:', error);
   }
@@ -77,26 +67,17 @@ const request = async (method, endpoint, data = null) => {
   }
 
   try {
-    console.log(`🔄 Making ${method} request to: ${url}`);
-    console.log('🧭 Request config:', config);
-    console.log('📤 Request data:', data);
-    console.log('🍪 CSRF token:', getCSRFToken());
-
     const response = await fetch(url, config);
     let responseData = {};
     try {
       responseData = await response.json();
     } catch (e) {
-      console.warn('⚠️ Response JSON parse failed, falling back to empty object', e);
       // try to get text for debugging
       try {
         const text = await response.text();
-        console.log('📜 Response text:', text);
       } catch (te) {}
     }
 
-    console.log(`📥 Response status: ${response.status}`);
-    console.log('📄 Response data:', responseData);
     
     if (!response.ok) {
       console.error(`❌ API Error: ${method} ${endpoint}`, {
@@ -104,15 +85,12 @@ const request = async (method, endpoint, data = null) => {
         statusText: response.statusText,
         data: responseData
       });
-      alert(`API Error: ${response.status} - ${responseData.detail || responseData.error || 'Unknown error'}`);
       throw new Error(responseData.detail || responseData.error || `HTTP ${response.status}`);
     }
-    console.log(`✅ API Success: ${method} ${endpoint}`);
     return responseData;
   } catch (error) {
     console.error(`💥 API request failed: ${method} ${endpoint}`, error);
     try { console.log('📤 Last request config for debugging:', config); } catch (e) {}
-    alert(`API Failed: ${error.message}`);
     throw error;
   }
 };
@@ -126,11 +104,9 @@ export const register = async ({ username, email, password, name }) => {
 };
 
 export const login = async ({ username, password }) => {
-  console.log('🔐 Attempting login for:', username);
-  alert(`🔐 Logging in as ${username}...`);
+  
   const result = await request('POST', '/auth/login/', { username, password });
-  console.log('✅ Login result:', result);
-  alert(`✅ Login successful for ${username}`);
+
   // Initialize CSRF token after login
   await initializeCSRF();
   return result;
@@ -141,11 +117,7 @@ export const logout = async () => {
 };
 
 export const getCurrentUser = async () => {
-  console.log('👤 Checking current user...');
-  alert('👤 Checking if you are logged in...');
   const result = await request('GET', '/auth/user/');
-  console.log('✅ Current user result:', result);
-  alert(`✅ You are logged in as ${result.username}`);
   return result;
 };
 
@@ -202,10 +174,8 @@ export const getCategories = async () => {
 
 export const createCategory = async (categoryData) => {
   console.log('📁 Creating category:', categoryData);
-  alert(`📁 Creating category: ${categoryData.name}`);
   const result = await request('POST', 'categories/', categoryData);
   console.log('✅ Category created:', result);
-  alert(`✅ Category "${result.name}" created successfully!`);
   return result;
 };
 
