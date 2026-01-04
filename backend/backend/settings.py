@@ -37,7 +37,9 @@ ROOT_URLCONF = "backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            BASE_DIR.parent / "dist",  # Look for templates in dist folder
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -84,6 +86,12 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
+
+# Static files configuration for production
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [
+    BASE_DIR.parent / "dist",  # Serve built React app
+]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
