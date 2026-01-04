@@ -7,7 +7,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key")
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost","dailyforge-bbhx.onrender.com"]
+ALLOWED_HOSTS = ["dailyforge-bbhx.onrender.com"]
 
 INSTALLED_APPS = [
     "corsheaders",
@@ -98,27 +98,21 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CORS (allow frontend dev server during development)
 # Allow the Vite dev server on port 5173 and 5174 (fallback)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
+    "https://dailyforge-bbhx.onrender.com"
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 # Trust the frontend origin for CSRF checks (include scheme)
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
+   "https://dailyforge-bbhx.onrender.com"
 ]
 
 # Session cookie settings for cross-origin requests
-SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = "None"
 # For local dev, cookies work on localhost; in prod you'd set SECURE=True
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Allow the CSRF header commonly used by fetch
 from corsheaders.defaults import default_headers
