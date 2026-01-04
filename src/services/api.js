@@ -1,5 +1,6 @@
 // Switch to Django backend API calls
-const API_BASE = 'http://localhost:8000/api';
+// Use relative URL for production deployment
+const API_BASE = '/api';
 
 // Helper to build a correct full URL regardless of leading/trailing slashes
 const buildUrl = (endpoint) => `${API_BASE}${endpoint && endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
