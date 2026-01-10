@@ -6,6 +6,9 @@ import EmptyState from '../../shared/components/EmptyState';
 export default function ExpenseTracker() {
   const { expenses, setExpenses, categories, setCategories, filterBySpan, graphSpan, setGraphSpan, addExpenseRemote, deleteExpenseRemote, updateExpenseRemote, saveCategoriesRemote, addFinanceCategoryRemote, updateFinanceCategoryRemote, deleteFinanceCategoryRemote } = useAppContext();
 
+  console.log('💰 Expenses component render - expenses:', expenses, 'isArray:', Array.isArray(expenses), 'length:', expenses?.length);
+  console.log('💰 Expenses - categories:', categories, 'isArray:', Array.isArray(categories), 'length:', categories?.length);
+
   const [newExpense, setNewExpense] = useState({
     amount: '',
     category: '',

@@ -4,6 +4,9 @@ import '../../styles.css';
 
 const Notes = () => {
   const { notes, setNotes, addNoteRemote, updateNoteRemote, deleteNoteRemote } = useAppContext();
+  
+  console.log('📝 Notes component render - notes:', notes, 'isArray:', Array.isArray(notes), 'length:', notes?.length);
+  
   const [newNote, setNewNote] = useState({ title: '', content: '', category: '', color: '#fef08a' });
   const [editingNote, setEditingNote] = useState(null);
   const [filterCategory, setFilterCategory] = useState('all');

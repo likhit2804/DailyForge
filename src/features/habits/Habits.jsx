@@ -6,6 +6,8 @@ import '../../styles.css';
 
 const Habits = () => {
   const { habits, setHabits, filterBySpan, graphSpan, setGraphSpan, weekOffset, monthOffset } = useAppContext();
+  
+  console.log('🎯 Habits component render - habits:', habits, 'isArray:', Array.isArray(habits), 'length:', habits?.length);
 
   const getDaysArray = (span, offset = 0) => {
     const today = new Date();
