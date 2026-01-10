@@ -5,6 +5,10 @@ import { useAppContext } from '../../context/AppContext';
 const QuadrantsSplitLayout = () => {
   const { tasks, addTaskRemote, updateTaskRemote, deleteTaskRemote, markTaskComplete, moveTask } = useAppContext();
 
+  console.log('📋 Quadrants component - tasks:', tasks);
+  console.log('📋 Quadrants - urgent_important:', tasks?.urgent_important?.length);
+  console.log('📋 Quadrants - not_urgent_important:', tasks?.not_urgent_important?.length);
+
   const [newTask, setNewTask] = useState('');
   const [newTaskQuadrant, setNewTaskQuadrant] = useState('urgent_important');
   const [newTaskDeadline, setNewTaskDeadline] = useState('');

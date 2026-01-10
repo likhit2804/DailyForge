@@ -6,6 +6,9 @@ import EmptyState from '../../shared/components/EmptyState';
 export default function ExpenseTracker() {
   const { expenses, setExpenses, categories, setCategories, filterBySpan, graphSpan, setGraphSpan, addExpenseRemote, deleteExpenseRemote, updateExpenseRemote, saveCategoriesRemote, addFinanceCategoryRemote, updateFinanceCategoryRemote, deleteFinanceCategoryRemote } = useAppContext();
 
+  console.log('💰 Expenses component - expenses:', expenses, 'is array?', Array.isArray(expenses), 'length:', expenses?.length);
+  console.log('💰 Expenses component - categories:', categories, 'is array?', Array.isArray(categories), 'length:', categories?.length);
+
   const [newExpense, setNewExpense] = useState({
     amount: '',
     category: '',
@@ -28,6 +31,13 @@ export default function ExpenseTracker() {
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
 
+  // Helper to get category name from ID
+  const getCategoryName = (categoryId) => {
+    if (!categoryId) return 'Other';
+    const cat = categories.find(c => c.id === categoryId);
+    return cat ? cat.name : 'Other';
+  };
+
   const totalExpenses = useMemo(() => {
     return filterBySpan(expenses)
       .filter(e => e.amount < 0)
@@ -37,9 +47,10 @@ export default function ExpenseTracker() {
 
   const filteredAndSortedExpenses = useMemo(() => {
     let filtered = expenses.filter(exp => {
+      const catName = getCategoryName(exp.category);
       const matchesSearch = exp.description?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           exp.category.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = filterCategory === 'all' || exp.category === filterCategory;
+                           catName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = filterCategory === 'all' || catName === filterCategory;
       return matchesSearch && matchesCategory;
     });
 
@@ -58,7 +69,7 @@ export default function ExpenseTracker() {
 
   const categoryStats = useMemo(() => {
     return categories.map(cat => {
-      const catExpenses = filterBySpan(expenses).filter(e => e.category === cat.name && e.amount < 0);
+      const catExpenses = filterBySpan(expenses).filter(e => e.category === cat.id && e.amount < 0);
       const total = catExpenses.reduce((sum, e) => sum + Math.abs(e.amount), 0);
       const avg = catExpenses.length ? total / catExpenses.length : 0;
       return { ...cat, total, avg, count: catExpenses.length };
@@ -511,7 +522,7 @@ useEffect(() => {
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                   >
                     <div>
-                      <div style={{fontSize: '14px', fontWeight: 'bold', color, marginBottom: '4px'}}>{expense.category}</div>
+                      <div style={{fontSize: '14px', fontWeight: 'bold', color, marginBottom: '4px'}}>{getCategoryName(expense.category)}</div>
                       <div style={{fontSize: '12px', color: '#6c757d'}}>{expense.date}</div>
                       {expense.time && <div style={{fontSize: '12px', color: '#6c757d'}}>{expense.time}</div>}
                       {expense.description && <div style={{fontSize: '11px', marginTop: '4px', color: '#666'}}>{expense.description.slice(0, 30)}{expense.description.length > 30 ? '...' : ''}</div>}

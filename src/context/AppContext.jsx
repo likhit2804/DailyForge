@@ -220,21 +220,27 @@ export const AppProvider = ({ children }) => {
         }
 
         if (mounted && ex.status === 'fulfilled') {
+          console.log('✅ reloadAll: raw expenses from API:', ex.value);
           // Map backend expenses to frontend shape
+          // Note: category is an ID from backend, but we need to keep it for now
+          // and convert it when displaying or will need to reload after categories load
           const mapped = ex.value.map(e => ({
             id: e.id,
-            category: e.title || e.category || 'Other',
+            category: e.category, // Keep as ID for now
+            categoryName: e.title || 'Expense', // Use title as backup
             amount: Number(e.amount),
             date: e.date || new Date().toISOString().split('T')[0],
+            time: e.time || '',
             description: e.description || '',
-            isRecurring: e.isRecurring || false
+            isRecurring: e.is_recurring || false
           }));
+          console.log('📊 reloadAll: setting expenses state with', mapped.length, 'items');
           setExpenses(mapped);
         }
 
         if (mounted && nt.status === 'fulfilled') {
           console.log('✅ reloadAll: notes from API:', nt.value);
-          setNotes(nt.value);
+          setNotes(nt.value || []);
         }
       } catch (err) {
         // ignore - keep defaults
