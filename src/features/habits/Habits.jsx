@@ -6,8 +6,6 @@ import '../../styles.css';
 
 const Habits = () => {
   const { habits, setHabits, filterBySpan, graphSpan, setGraphSpan, weekOffset, monthOffset } = useAppContext();
-  
-  console.log('🎯 Habits component - habits from context:', habits, 'is array?', Array.isArray(habits), 'length:', habits?.length);
 
   const getDaysArray = (span, offset = 0) => {
     const today = new Date();
@@ -46,16 +44,6 @@ const Habits = () => {
 
   const days = getDaysArray(graphSpan === 'week' ? 'week' : 'month', graphSpan === 'week' ? weekOffset : monthOffset);
   const completedArrayForHabit = (habit) => days.map(dayStr => !!(habit.completedByDate && habit.completedByDate[dayStr]));
-
-  // Safety check for habits array
-  if (!Array.isArray(habits) || habits.length === 0) {
-    console.log('⚠️ Habits component - no habits to display');
-    return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <p>No habits yet. Create your first habit to get started!</p>
-      </div>
-    );
-  }
 
   const habitsWithStreaks = habits.map(habit => {
     let streak = 0;
