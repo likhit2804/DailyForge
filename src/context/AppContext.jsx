@@ -252,8 +252,10 @@ export const AppProvider = ({ children }) => {
     }
   }, [isAuthenticated]);
 
-  // Load categories once
+  // Load categories when authenticated
   useEffect(() => {
+    if (!isAuthenticated) return;
+    
     let mounted = true;
     (async () => {
       try {
@@ -268,8 +270,11 @@ export const AppProvider = ({ children }) => {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [isAuthenticated]);
+  
   useEffect(() => {
+    if (!isAuthenticated) return;
+    
     let mounted = true;
     (async () => {
       try {
@@ -280,7 +285,7 @@ export const AppProvider = ({ children }) => {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [isAuthenticated]);
 
 
 
@@ -407,11 +412,29 @@ export const AppProvider = ({ children }) => {
   };
 
   const addExpenseRemote = async (expense) => {
-    // expense: { category, amount, date, description, isRecurring }
+    // expense: { category (ID or name), amount, date, description, isRecurring, title }
     try {
-      const payload = { title: expense.category, amount: expense.amount, date: expense.date, description: expense.description, is_recurring: !!expense.isRecurring };
+      // If category is a name, find the ID
+      let categoryId = expense.category;
+      if (typeof categoryId === 'string') {
+        const cat = financeCategories.find(c => c.name === categoryId);
+        if (!cat) {
+          console.warn(`Category "${categoryId}" not found`);
+          return null;
+        }
+        categoryId = cat.id;
+      }
+      
+      const payload = { 
+        category: categoryId,
+        title: expense.title || expense.description || 'Expense', 
+        amount: expense.amount, 
+        date: expense.date, 
+        description: expense.description || '', 
+        is_recurring: !!expense.isRecurring 
+      };
       const created = await api.createExpense(payload);
-      const item = { ...expense, id: created.id, date: created.date || expense.date };
+      const item = { ...expense, id: created.id, date: created.date || expense.date, category: created.category };
       setExpenses(prev => [...prev, item]);
       return item;
     } catch (err) {
@@ -427,8 +450,25 @@ export const AppProvider = ({ children }) => {
 
   const updateExpenseRemote = async (expenseId, payload) => {
     try {
-      const updated = await api.updateExpense(expenseId, { title: payload.category, amount: payload.amount, date: payload.date, description: payload.description, is_recurring: !!payload.isRecurring });
-      setExpenses(prev => prev.map(e => e.id === expenseId ? { ...e, ...payload, id: updated.id } : e));
+      // If category is a name, find the ID
+      let categoryId = payload.category;
+      if (typeof categoryId === 'string') {
+        const cat = financeCategories.find(c => c.name === categoryId);
+        if (cat) {
+          categoryId = cat.id;
+        }
+      }
+      
+      const updateData = { 
+        category: categoryId,
+        title: payload.title || payload.description || 'Expense',
+        amount: payload.amount, 
+        date: payload.date, 
+        description: payload.description || '', 
+        is_recurring: !!payload.isRecurring 
+      };
+      const updated = await api.updateExpense(expenseId, updateData);
+      setExpenses(prev => prev.map(e => e.id === expenseId ? { ...e, ...payload, id: updated.id, category: updated.category } : e));
       return updated;
     } catch (err) {
       console.warn('updateExpenseRemote error', err);
@@ -485,6 +525,75 @@ export const AppProvider = ({ children }) => {
     } catch (err) {
       console.warn('saveFinanceCategoriesRemote error', err);
       return null;
+    }
+  };
+
+  // Finance category management
+  const addFinanceCategoryRemote = async (categoryData) => {
+    try {
+      const created = await api.createFinanceCategory({ name: categoryData.name, color: categoryData.color || '#3b82f6', budget: categoryData.budget || 0 });
+      const newCat = { id: created.id, name: created.name, color: created.color, budget: created.budget || 0 };
+      setFinanceCategories(prev => [...prev, newCat]);
+      setCategories(prev => [...prev, newCat]);
+      return newCat;
+    } catch (err) {
+      console.warn('addFinanceCategoryRemote error', err);
+      return null;
+    }
+  };
+
+  const updateFinanceCategoryRemote = async (categoryId, categoryData) => {
+    try {
+      const updated = await api.updateFinanceCategory(categoryId, categoryData);
+      setFinanceCategories(prev => prev.map(c => c.id === categoryId ? { ...c, ...updated } : c));
+      setCategories(prev => prev.map(c => c.id === categoryId ? { ...c, ...updated } : c));
+      return updated;
+    } catch (err) {
+      console.warn('updateFinanceCategoryRemote error', err);
+      return null;
+    }
+  };
+
+  const deleteFinanceCategoryRemote = async (categoryId) => {
+    try {
+      await api.deleteFinanceCategory(categoryId);
+      setFinanceCategories(prev => prev.filter(c => c.id !== categoryId));
+      setCategories(prev => prev.filter(c => c.id !== categoryId));
+    } catch (err) {
+      console.warn('deleteFinanceCategoryRemote error', err);
+    }
+  };
+
+  // Task category management
+  const addTaskCategoryRemote = async (categoryData) => {
+    try {
+      const created = await api.createTaskCategory({ name: categoryData.name, color: categoryData.color || '#3b82f6' });
+      const newCat = { id: created.id, name: created.name, color: created.color };
+      setTaskCategories(prev => [...prev, newCat]);
+      return newCat;
+    } catch (err) {
+      console.warn('addTaskCategoryRemote error', err);
+      return null;
+    }
+  };
+
+  const updateTaskCategoryRemote = async (categoryId, categoryData) => {
+    try {
+      const updated = await api.updateTaskCategory(categoryId, categoryData);
+      setTaskCategories(prev => prev.map(c => c.id === categoryId ? { ...c, ...updated } : c));
+      return updated;
+    } catch (err) {
+      console.warn('updateTaskCategoryRemote error', err);
+      return null;
+    }
+  };
+
+  const deleteTaskCategoryRemote = async (categoryId) => {
+    try {
+      await api.deleteTaskCategory(categoryId);
+      setTaskCategories(prev => prev.filter(c => c.id !== categoryId));
+    } catch (err) {
+      console.warn('deleteTaskCategoryRemote error', err);
     }
   };
 
@@ -641,6 +750,12 @@ export const AppProvider = ({ children }) => {
     saveFinanceCategoriesRemote,
     saveCategoriesRemote,
     saveTaskCategoriesRemote,
+    addFinanceCategoryRemote,
+    updateFinanceCategoryRemote,
+    deleteFinanceCategoryRemote,
+    addTaskCategoryRemote,
+    updateTaskCategoryRemote,
+    deleteTaskCategoryRemote,
     // Tasks
     addTaskRemote,
     updateTaskRemote,

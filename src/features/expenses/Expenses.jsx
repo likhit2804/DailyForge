@@ -4,7 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import '../../styles.css'; // Import shared CSS
 import EmptyState from '../../shared/components/EmptyState';
 export default function ExpenseTracker() {
-  const { expenses, setExpenses, categories, setCategories, filterBySpan, graphSpan, setGraphSpan, addExpenseRemote, deleteExpenseRemote, updateExpenseRemote, saveCategoriesRemote } = useAppContext();
+  const { expenses, setExpenses, categories, setCategories, filterBySpan, graphSpan, setGraphSpan, addExpenseRemote, deleteExpenseRemote, updateExpenseRemote, saveCategoriesRemote, addFinanceCategoryRemote, updateFinanceCategoryRemote, deleteFinanceCategoryRemote } = useAppContext();
 
   const [newExpense, setNewExpense] = useState({
     amount: '',
@@ -85,7 +85,7 @@ useEffect(() => {
     saveCategoriesRemote(categories);
   }
 }, [categories]);
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (!newExpense.amount || !newExpense.date) return;
 
     // Ensure amount parses to a valid number
@@ -93,17 +93,24 @@ useEffect(() => {
     if (Number.isNaN(parsedAmount)) return;
 
     // Default category to the selected one, or first available, or create 'Other'
-    let categoryToUse = newExpense.category || (categories[0] && categories[0].name) || 'Other';
-    if (!categories.find(c => c.name === categoryToUse)) {
-      // create a default 'Other' category when none exist
+    let categoryToUse = newExpense.category || (categories[0] && categories[0].name);
+    
+    // If no category exists, create a default 'Other' category
+    if (!categoryToUse || !categories.find(c => c.name === categoryToUse)) {
+      categoryToUse = categoryToUse || 'Other';
       const fallback = { name: categoryToUse, color: '#cbd5e0', budget: 0 };
-      // persist categories remotely/local storage
-      saveCategoriesRemote([...(categories || []), fallback]);
+      const created = await addFinanceCategoryRemote(fallback);
+      if (!created) {
+        alert('Failed to create category. Please try again.');
+        return;
+      }
+      categoryToUse = created.name;
     }
     
     const expenseToAdd = {
       id: Date.now(),
       category: categoryToUse,
+      title: categoryToUse,
       date: newExpense.date,
       time: newExpense.time,
       description: newExpense.description || '',
@@ -112,26 +119,29 @@ useEffect(() => {
       recurringDuration: newExpense.recurringDuration
     };
     
-    if (newExpense.isRecurring && newExpense.recurringDuration > 0) {
-      // create first expense and rely on backend/local replication for recurring items
-      addExpenseRemote(expenseToAdd);
-    } else {
-      addExpenseRemote(expenseToAdd);
-    }
-    
+    await addExpenseRemote(expenseToAdd);
     setNewExpense({ amount: '', category: '', date: '', time: '', description: '', isIncome: false, isRecurring: false, recurringDuration: 1 });
+    setShowAddExpenseModal(false);
   };
 
-  const handleAddCategory = () => {
+  const handleAddCategory = async () => {
     if (!newCategory.name) return;
     if (editingCategory) {
-      setCategories(prev => prev.map(c => c.name === editingCategory ? { ...newCategory, name: newCategory.name } : c));
-      setExpenses(prev => prev.map(exp => exp.category === editingCategory ? {...exp, category: newCategory.name} : exp));
+      const catToUpdate = categories.find(c => c.name === editingCategory);
+      if (catToUpdate) {
+        await updateFinanceCategoryRemote(catToUpdate.id, { name: newCategory.name, color: newCategory.color, budget: newCategory.budget });
+        // Update expenses that use this category
+        const expensesToUpdate = expenses.filter(exp => exp.category === editingCategory);
+        for (const exp of expensesToUpdate) {
+          await updateExpenseRemote(exp.id, { ...exp, category: newCategory.name });
+        }
+      }
       setEditingCategory(null);
     } else {
-      setCategories(prev => [...prev, { ...newCategory }]);
+      await addFinanceCategoryRemote(newCategory);
     }
     setNewCategory({ name: '', color: '#cbd5e0', budget: 0 });
+    setShowAddCategoryModal(false);
   };
 
   const handleSaveEdit = (expenseId) => {
@@ -366,9 +376,9 @@ useEffect(() => {
                     setEditingCategory(cat.name);
                     setNewCategory(cat);
                   }}>✏️</button>
-                  <button className="btn btn-sm p-0 border-0" style={{background: 'none', fontSize: '12px'}} onClick={() => {
+                  <button className="btn btn-sm p-0 border-0" style={{background: 'none', fontSize: '12px'}} onClick={async () => {
                     if (confirm(`Delete category "${cat.name}"? All expenses in this category will remain but need recategorization.`)) {
-                      setCategories(prev => prev.filter(c => c.name !== cat.name));
+                      await deleteFinanceCategoryRemote(cat.id);
                     }
                   }}>🗑️</button>
                 </div>
