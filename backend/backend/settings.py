@@ -60,13 +60,17 @@ ASGI_APPLICATION = "backend.asgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "dailyforge_hpk2",
-        "USER": "dailyforge_hpk2_user",
-        "PASSWORD": "NA8sASnHidMo9EEti3mow5zg2a4guvqV",
-        "HOST": "dpg-d5cvuth5pdvs73d0c4ng-a.oregon-postgres.render.com",
+        "NAME": "dailyforge_lc0r",
+        "USER": "dailyforge_lc0r_user",
+        "PASSWORD": "NLV1T9bZNEFEl5f87Z5a6a1hWEro6LWV",
+        "HOST": "dpg-d5h3pbvpm1nc73brb9n0-a.oregon-postgres.render.com",
         "PORT": "5432",
+        "OPTIONS": {
+            "sslmode": "require",  # 🔴 REQUIRED on Render
+        },
     }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
