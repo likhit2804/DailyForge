@@ -10,10 +10,12 @@ class HabitSerializer(serializers.ModelSerializer):
 
 
 class ExpenseSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    
     class Meta:
         model = Expense
-        fields = ['id', 'title', 'amount', 'date', 'time', 'description', 'is_recurring', 'category']
-        read_only_fields = ['id']
+        fields = ['id', 'title', 'amount', 'date', 'time', 'description', 'is_recurring', 'category', 'category_name']
+        read_only_fields = ['id', 'category_name']
 
 
 class FinanceCategorySerializer(serializers.ModelSerializer):

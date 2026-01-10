@@ -223,18 +223,20 @@ export const AppProvider = ({ children }) => {
           // Map backend expenses to frontend shape
           const mapped = ex.value.map(e => ({
             id: e.id,
-            category: e.title || e.category || 'Other',
+            category: e.category_name || e.title || 'Other',
+            categoryId: e.category,
             amount: Number(e.amount),
             date: e.date || new Date().toISOString().split('T')[0],
+            time: e.time || '',
             description: e.description || '',
-            isRecurring: e.isRecurring || false
+            isRecurring: e.is_recurring || false
           }));
           setExpenses(mapped);
         }
 
         if (mounted && nt.status === 'fulfilled') {
           console.log('✅ reloadAll: notes from API:', nt.value);
-          setNotes(nt.value);
+          setNotes(Array.isArray(nt.value) ? nt.value : []);
         }
       } catch (err) {
         // ignore - keep defaults
