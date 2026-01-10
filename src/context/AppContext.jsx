@@ -185,14 +185,13 @@ export const AppProvider = ({ children }) => {
     let mounted = true;
     async function load() {
       try {
-        const [hb, ex, ts, nt] = await Promise.allSettled([
+        const [hb, ex, nt] = await Promise.allSettled([
           api.getHabits(),
           api.getExpenses(),
-          api.getTimerSessions(),
           api.getNotes()
         ]);
 
-        console.log('📦 reloadAll Promise.allSettled results:', { hb, ex, ts, nt });
+        console.log('📦 reloadAll Promise.allSettled results:', { hb, ex, nt });
 
         if (mounted && hb.status === 'fulfilled') {
           console.log('✅ reloadAll: raw habits from API:', hb.value);
