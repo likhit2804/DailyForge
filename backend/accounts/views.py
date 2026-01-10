@@ -4,10 +4,10 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Habit, Expense, Category, Task, Note, TimerSession, Quadrant, QuadrantTask
+from .models import Habit, Expense, FinanceCategory,Task, TaskCategory, Note, Quadrant, QuadrantTask
 from .serializers import (
-    HabitSerializer, ExpenseSerializer, CategorySerializer,
-    TaskSerializer, NoteSerializer, TimerSessionSerializer,
+    HabitSerializer, ExpenseSerializer, FinanceCategorySerializer, TaskCategorySerializer,
+    TaskSerializer, NoteSerializer,
     QuadrantSerializer, QuadrantTaskSerializer,
 )
 
@@ -103,18 +103,36 @@ class ExpenseViewSet(viewsets.ModelViewSet):
             serializer.save(user=self.request.user)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    serializer_class = CategorySerializer
+
+
+class FinanceCategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = FinanceCategorySerializer
     permission_classes = [AllowAny]
     
     def get_queryset(self):
-        print(f"CategoryViewSet.get_queryset: user={self.request.user}, is_authenticated={self.request.user.is_authenticated}")
+        print(f"FinanceCategoryViewSet.get_queryset: user={self.request.user}, is_authenticated={self.request.user.is_authenticated}")
         if self.request.user.is_authenticated:
-            return Category.objects.filter(user=self.request.user)
-        return Category.objects.none()
+            return FinanceCategory.objects.filter(user=self.request.user)
+        return FinanceCategory.objects.none()
     
     def perform_create(self, serializer):
-        print(f"CategoryViewSet.perform_create: user={self.request.user}, is_authenticated={self.request.user.is_authenticated}")
+        print(f"FinanceCategoryViewSet.perform_create: user={self.request.user}, is_authenticated={self.request.user.is_authenticated}")
+        if self.request.user.is_authenticated:
+            serializer.save(user=self.request.user)
+        else:
+            raise PermissionError("User not authenticated")
+
+class TaskCategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = TaskCategorySerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        print(f"TaskCategoryViewSet.get_queryset: user={self.request.user}, is_authenticated={self.request.user.is_authenticated}")
+        if self.request.user.is_authenticated:
+            return TaskCategory.objects.filter(user=self.request.user)
+        return TaskCategory.objects.none()      
+    def perform_create(self, serializer):
+        print(f"TaskCategoryViewSet.perform_create: user={self.request.user}, is_authenticated={self.request.user.is_authenticated}")
         if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
         else:
@@ -151,20 +169,6 @@ class NoteViewSet(viewsets.ModelViewSet):
         if self.request.user.is_authenticated:
             return Note.objects.filter(user=self.request.user)
         return Note.objects.none()
-    
-    def perform_create(self, serializer):
-        if self.request.user.is_authenticated:
-            serializer.save(user=self.request.user)
-
-
-class TimerSessionViewSet(viewsets.ModelViewSet):
-    serializer_class = TimerSessionSerializer
-    permission_classes = [AllowAny]
-    
-    def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return TimerSession.objects.filter(user=self.request.user)
-        return TimerSession.objects.none()
     
     def perform_create(self, serializer):
         if self.request.user.is_authenticated:

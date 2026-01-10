@@ -7,7 +7,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key")
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["dailyforge-bbhx.onrender.com"]
+ALLOWED_HOSTS = ["dailyforge-bbhx.onrender.com", "localhost", "127.0.0.1"]
 
 INSTALLED_APPS = [
     "corsheaders",
@@ -98,13 +98,17 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CORS (allow frontend dev server during development)
 # Allow the Vite dev server on port 5173 and 5174 (fallback)
 CORS_ALLOWED_ORIGINS = [
-    "https://dailyforge-bbhx.onrender.com"
+    "https://dailyforge-bbhx.onrender.com",
+    "http://localhost:5173",
+    "http://localhost:5174",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 # Trust the frontend origin for CSRF checks (include scheme)
 CSRF_TRUSTED_ORIGINS = [
-   "https://dailyforge-bbhx.onrender.com"
+   "https://dailyforge-bbhx.onrender.com",
+    "http://localhost:5173",
+    "http://localhost:5174",
 ]
 
 # Session cookie settings for cross-origin requests

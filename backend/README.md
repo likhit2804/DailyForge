@@ -154,23 +154,6 @@ For now, the API uses session authentication. You'll need to:
 }
 ```
 
-### Timer Sessions
-- **GET** `/api/timer-sessions/` - List all timer sessions
-- **POST** `/api/timer-sessions/` - Create a new timer session
-- **GET** `/api/timer-sessions/{id}/` - Get a specific session
-- **PUT** `/api/timer-sessions/{id}/` - Update a session
-- **PATCH** `/api/timer-sessions/{id}/` - Partial update
-- **DELETE** `/api/timer-sessions/{id}/` - Delete a session
-
-**Timer Session Fields:**
-```json
-{
-  "id": 1,
-  "duration": 1500,
-  "task_name": "Study Session",
-  "created_at": "2026-01-02T10:30:00Z"
-}
-```
 
 ## Admin Panel
 Access the Django admin at http://localhost:8000/admin/ to manage:

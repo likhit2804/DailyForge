@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import api from '../services/api';
 
 const AppContext = createContext();
@@ -12,7 +13,6 @@ export const useAppContext = () => {
 };
 
 export const AppProvider = ({ children }) => {
-  // Django authentication state
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
@@ -25,6 +25,8 @@ export const AppProvider = ({ children }) => {
     not_urgent_not_important: []
   });
   const [expenses, setExpenses] = useState([]);
+  const [financeCategories, setFinanceCategories] = useState([]);
+  const [taskCategories, setTaskCategories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [notes, setNotes] = useState([]);
   const [graphSpan, setGraphSpan] = useState('month');
@@ -121,12 +123,7 @@ export const AppProvider = ({ children }) => {
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
   const avgStreak = habits.length ? Math.round(habits.reduce((sum, h) => sum + (h.streak ?? computeStreak(h.completed || [])), 0) / habits.length) : 0;
 
-  // Initialize authentication and load data
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback(async () => {
     try {
       const user = await api.getCurrentUser();
       if (user) {
@@ -143,26 +140,23 @@ export const AppProvider = ({ children }) => {
     } finally {
       setAuthLoading(false);
     }
-  };
+  }, []);
+
+  // Initialize authentication and load data
+  useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]);
 
   const login = async (username, password) => {
-    try {
-      await api.login({ username, password });
-      await checkAuthStatus();
-      return true;
-    } catch (error) {
-      throw error;
-    }
+    await api.login({ username, password });
+    await checkAuthStatus();
+    return true;
   };
 
   const register = async (userData) => {
-    try {
-      await api.register(userData);
-      await checkAuthStatus();
-      return true;
-    } catch (error) {
-      throw error;
-    }
+    await api.register(userData);
+    await checkAuthStatus();
+    return true;
   };
 
   const logout = async () => {
@@ -178,14 +172,15 @@ export const AppProvider = ({ children }) => {
         not_urgent_not_important: []
       });
       setExpenses([]);
-      setCategories([]);
+      setFinanceCategories([]);
+      setTaskCategories([]);
       setNotes([]);
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
 
-  const reloadAll = async () => {
+  const reloadAll = useCallback(async () => {
     console.log('🔁 AppContext.reloadAll: starting full data reload');
     let mounted = true;
     async function load() {
@@ -248,7 +243,7 @@ export const AppProvider = ({ children }) => {
     }
     load();
     return () => { mounted = false; };
-  };
+  }, []);
 
   // Load data when authentication status changes
   useEffect(() => {
@@ -262,12 +257,32 @@ export const AppProvider = ({ children }) => {
     let mounted = true;
     (async () => {
       try {
-        const cats = await api.getCategories();
-        if (mounted && Array.isArray(cats)) setCategories(cats);
-      } catch {}
+        const cats = await api.getFinanceCategories();
+        if (mounted && Array.isArray(cats)) {
+          // Keep backend finance categories and UI categories in sync
+          setFinanceCategories(cats);
+          setCategories(cats);
+        }
+      } catch (error) {
+        console.warn('Failed to load finance categories:', error);
+      }
     })();
     return () => { mounted = false; };
   }, []);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const cats = await api.getTaskCategories();
+        if (mounted && Array.isArray(cats)) setTaskCategories(cats);
+      } catch (error) {
+        console.warn('Failed to load task categories:', error);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+
 
   // Load quadrant tasks (Eisenhower matrix) once and group by quadrant
   // Uses dedicated /quadrant-tasks/ API so it doesn't conflict with Todo tasks
@@ -460,13 +475,41 @@ export const AppProvider = ({ children }) => {
   };
 
   // Category helpers
-  const saveCategoriesRemote = async (cats) => {
+  const saveFinanceCategoriesRemote = async (cats) => {
     try {
-      await api.saveCategories(cats);
+      // Note: This assumes a bulk update endpoint exists
+      // For now, we'll just update local state
+      setFinanceCategories(cats);
       setCategories(cats);
       return cats;
     } catch (err) {
+      console.warn('saveFinanceCategoriesRemote error', err);
+      return null;
+    }
+  };
+
+  // Legacy helper used by Expenses feature to persist UI categories.
+  // Currently this just keeps `categories` and `financeCategories` in sync
+  // without making extra API calls beyond the per-category endpoints.
+  const saveCategoriesRemote = async (cats) => {
+    try {
+      setCategories(cats);
+      setFinanceCategories(cats);
+      return cats;
+    } catch (err) {
       console.warn('saveCategoriesRemote error', err);
+      return null;
+    }
+  };
+
+  const saveTaskCategoriesRemote = async (cats) => {
+    try {
+      // Note: This assumes a bulk update endpoint exists
+      // For now, we'll just update local state
+      setTaskCategories(cats);
+      return cats;
+    } catch (err) {
+      console.warn('saveTaskCategoriesRemote error', err);
       return null;
     }
   };
@@ -546,42 +589,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // User management actions
-  const switchUser = (userId) => {
-    api.setCurrentUserId(userId);
-    setCurrentUserIdState(userId);
-  };
-
-  const createUser = async (name, color, email, password) => {
-    const newUser = api.createUser({ name, color, email, password });
-    setUsers(api.getUsers());
-    setCurrentUserIdState(newUser.id);
-    return newUser;
-  };
-
-  const authenticate = async (email, password) => {
-    const user = api.authenticate(email, password);
-    if (user) {
-      api.setCurrentUserId(user.id);
-      setCurrentUserIdState(user.id);
-      setUsers(api.getUsers());
-      return user;
-    }
-    return null;
-  };
-
-  const signOut = () => {
-    api.setCurrentUserId(null);
-    setCurrentUserIdState(null);
-  };
-
-  const deleteUser = async (userId) => {
-    api.deleteUser(userId);
-    const updated = api.getUsers();
-    setUsers(updated);
-    setCurrentUserIdState(api.getCurrentUserId());
-  };
-
   const value = {
     // Authentication
     currentUser,
@@ -597,6 +604,10 @@ export const AppProvider = ({ children }) => {
     setTasks,
     expenses,
     setExpenses,
+    financeCategories,
+    setFinanceCategories,
+    taskCategories,
+    setTaskCategories,
     categories,
     setCategories,
     notes,
@@ -627,7 +638,9 @@ export const AppProvider = ({ children }) => {
     updateNoteRemote,
     deleteNoteRemote,
     // Categories
+    saveFinanceCategoriesRemote,
     saveCategoriesRemote,
+    saveTaskCategoriesRemote,
     // Tasks
     addTaskRemote,
     updateTaskRemote,
@@ -640,3 +653,9 @@ export const AppProvider = ({ children }) => {
     </AppContext.Provider>
   );
 };
+
+AppProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+export default AppProvider;

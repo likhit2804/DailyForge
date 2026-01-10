@@ -16,25 +16,8 @@ class Habit(models.Model):
         ordering = ['-created_at']
 
 
-class Expense(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses')
-    title = models.CharField(max_length=255)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField()
-    time = models.TimeField(null=True, blank=True)
-    description = models.TextField(blank=True)
-    is_recurring = models.BooleanField(default=False)
-    category = models.CharField(max_length=100, default='Other')
-    
-    def __str__(self):
-        return f"{self.user.username} - {self.title} - ${self.amount}"
-    
-    class Meta:
-        ordering = ['-date', '-id']
-
-
-class Category(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')
+class FinanceCategory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='finance_categories')
     name = models.CharField(max_length=100)
     color = models.CharField(max_length=20, default='#cbd5e0')
     budget = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -46,10 +29,40 @@ class Category(models.Model):
         ordering = ['name']
         unique_together = ['user', 'name']
 
+class Expense(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses')
+    title = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField()
+    time = models.TimeField(null=True, blank=True)
+    description = models.TextField(blank=True)
+    is_recurring = models.BooleanField(default=False)
+    category = models.ForeignKey(FinanceCategory, on_delete=models.CASCADE, related_name='expenses')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.title} - ${self.amount}"
+    
+    class Meta:
+        ordering = ['-date', '-id']
+
+
+class TaskCategory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task_categories')
+    name = models.CharField(max_length=100)
+    color = models.CharField(max_length=20, default='#cbd5e0')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.name}"
+    
+    class Meta:
+        ordering = ['name']
+        unique_together = ['user', 'name']
+
+
 
 class Task(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='tasks')
+    category = models.ForeignKey(TaskCategory, on_delete=models.CASCADE, related_name='tasks')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     completed = models.BooleanField(default=False)
@@ -77,20 +90,6 @@ class Note(models.Model):
     
     class Meta:
         ordering = ['-updated_at']
-
-
-class TimerSession(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='timer_sessions')
-    duration = models.IntegerField()  # in seconds
-    task_name = models.CharField(max_length=255, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"{self.user.username} - {self.duration}s - {self.task_name}"
-    
-    class Meta:
-        ordering = ['-created_at']
-
 
 class Quadrant(models.Model):
     """Represents a named quadrant configuration for a user (e.g. Eisenhower matrix cells)."""

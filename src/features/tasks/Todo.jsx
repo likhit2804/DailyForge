@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import EmptyState from '../../shared/components/EmptyState';
-import { getCategories, createCategory, updateCategory, deleteCategory, getTasks, createTask, updateTask, deleteTask } from '../../services/api';
+import { getTaskCategories, createTaskCategory, updateTaskCategory, deleteTaskCategory, getTasks, createTask, updateTask, deleteTask } from '../../services/api';
 
 // Categories API
 const categoriesApi = {
-  getCategories: async () => {
-    const categories = await getCategories();
+  getTaskCategories: async () => {
+    const categories = await getTaskCategories();
     return categories.map(cat => ({
       id: cat.id.toString(),
       name: cat.name,
@@ -15,8 +15,8 @@ const categoriesApi = {
     }));
   },
   
-  createCategory: async (categoryData) => {
-    const newCat = await createCategory({
+  createTaskCategory: async (categoryData) => {
+    const newCat = await createTaskCategory({
       name: categoryData.name,
       color: categoryData.color || '#3b82f6'
     });
@@ -29,8 +29,8 @@ const categoriesApi = {
     };
   },
   
-  updateCategory: async (categoryId, categoryData) => {
-    const updatedCat = await updateCategory(parseInt(categoryId), {
+  updateTaskCategory: async (categoryId, categoryData) => {
+    const updatedCat = await updateTaskCategory(parseInt(categoryId), {
       name: categoryData.name,
       color: categoryData.color
     });
@@ -43,15 +43,15 @@ const categoriesApi = {
     };
   },
   
-  deleteCategory: async (categoryId) => {
-    await deleteCategory(parseInt(categoryId));
+  deleteTaskCategory: async (categoryId) => {
+    await deleteTaskCategory(parseInt(categoryId));
     return { success: true };
   }
 };
 
 // Category Items API
 const categoryItemsApi = {
-  getCategoryItems: async (categoryId) => {
+  getTaskCategoryItems: async (categoryId) => {
     const allTasks = await getTasks();
     return allTasks
       .filter(task => task.category.toString() === categoryId)
@@ -148,7 +148,7 @@ const CustomCategoryToDo = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const loadedCategories = await categoriesApi.getCategories();
+      const loadedCategories = await categoriesApi.getTaskCategories();
       
       if (loadedCategories.length === 0) {
         // Initialize with sample categories
@@ -157,10 +157,10 @@ const CustomCategoryToDo = () => {
         ];
         
         for (const cat of defaultCategories) {
-          await categoriesApi.createCategory(cat);
+          await categoriesApi.createTaskCategory(cat);
         }
         
-        const reloadedCategories = await categoriesApi.getCategories();
+        const reloadedCategories = await categoriesApi.getTaskCategories();
         setCategories(reloadedCategories);
       } else {
         setCategories(loadedCategories);
@@ -185,11 +185,11 @@ const CustomCategoryToDo = () => {
     }
   };
 
-  const createCategory = async () => {
+  const createTaskCategory = async () => {
     if (!newCategoryName.trim()) return;
 
     try {
-      await categoriesApi.createCategory({
+      await categoriesApi.createTaskCategory({
         name: newCategoryName,
         icon: newCategoryIcon,
         color: newCategoryColor
@@ -304,7 +304,7 @@ const CustomCategoryToDo = () => {
     });
   };
 
-  const getCategoryStats = (categoryId) => {
+  const getTaskCategoryStats = (categoryId) => {
     const categoryItems = items[categoryId] || [];
     return {
       total: categoryItems.length,
@@ -406,7 +406,7 @@ const CustomCategoryToDo = () => {
                   type="text"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && createCategory()}
+                  onKeyPress={(e) => e.key === 'Enter' && createTaskCategory()}
                   placeholder="Category name (e.g., Movies to Watch)"
                   style={{
                     padding: '12px',
@@ -469,7 +469,7 @@ const CustomCategoryToDo = () => {
                   </div>
                 </div>
                 <button
-                  onClick={createCategory}
+                  onClick={createTaskCategory}
                   style={{
                     padding: '12px',
                     background: '#667eea',
@@ -504,7 +504,7 @@ const CustomCategoryToDo = () => {
           gap: '20px'
         }}>
           {categories.map(category => {
-            const stats = getCategoryStats(category.id);
+            const stats = getTaskCategoryStats(category.id);
             const categoryItems = getFilteredItems(items[category.id]);
 
             return (

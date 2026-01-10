@@ -167,24 +167,41 @@ export const deleteExpense = async (expenseId) => {
 };
 
 // Categories
-export const getCategories = async () => {
-  const docs = await request('GET', 'categories/');
+export const getFinanceCategories = async () => {
+  const docs = await request('GET', 'finance-categories/');
   return Array.isArray(docs) ? docs : [];
 };
 
-export const createCategory = async (categoryData) => {
+export const createFinanceCategory = async (categoryData) => {
   console.log('📁 Creating category:', categoryData);
-  const result = await request('POST', 'categories/', categoryData);
+  const result = await request('POST', 'finance-categories/', categoryData);
   console.log('✅ Category created:', result);
   return result;
 };
 
-export const updateCategory = async (categoryId, categoryData) => {
-  return request('PATCH', `categories/${categoryId}/`, categoryData);
+export const updateFinanceCategory = async (categoryId, categoryData) => {
+  return request('PATCH', `finance-categories/${categoryId}/`, categoryData);
 };
 
-export const deleteCategory = async (categoryId) => {
-  return request('DELETE', `categories/${categoryId}/`);
+export const deleteFinanceCategory = async (categoryId) => {
+  return request('DELETE', `finance-categories/${categoryId}/`);
+};
+
+export const getTaskCategories = async () => {
+  const docs = await request('GET', 'task-categories/');
+  return Array.isArray(docs) ? docs : [];
+};
+
+export const createTaskCategory = async (categoryData) => {
+  return request('POST', 'task-categories/', categoryData);
+};
+
+export const updateTaskCategory = async (categoryId, categoryData) => {
+  return request('PATCH', `task-categories/${categoryId}/`, categoryData);
+};
+
+export const deleteTaskCategory = async (categoryId) => {
+  return request('DELETE', `task-categories/${categoryId}/`);
 };
 
 // Tasks
@@ -241,16 +258,8 @@ export const deleteNote = async (noteId) => {
   return request('DELETE', `notes/${noteId}/`);
 };
 
-// Timer Sessions
-export const getTimerSessions = async () => {
-  return request('GET', 'timer-sessions/');
-};
-
-export const createTimerSession = async (sessionData) => {
-  return request('POST', 'timer-sessions/', sessionData);
-};
-
-export default {
+// Default export aggregating all API helpers for existing imports
+const api = {
   register,
   login,
   logout,
@@ -265,10 +274,14 @@ export default {
   createExpense,
   updateExpense,
   deleteExpense,
-  getCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
+  getFinanceCategories,
+  createFinanceCategory,
+  updateFinanceCategory,
+  deleteFinanceCategory,
+  getTaskCategories,
+  createTaskCategory,
+  updateTaskCategory,
+  deleteTaskCategory,
   getTasks,
   createTask,
   updateTask,
@@ -281,6 +294,6 @@ export default {
   createNote,
   updateNote,
   deleteNote,
-  getTimerSessions,
-  createTimerSession
 };
+
+export default api;
