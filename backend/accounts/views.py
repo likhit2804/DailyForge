@@ -4,11 +4,12 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Habit, Expense, FinanceCategory,Task, TaskCategory, Note, Quadrant, QuadrantTask
+from .models import Habit, Expense, FinanceCategory,Task, TaskCategory, Note, Quadrant, QuadrantTask, Thought
 from .serializers import (
     HabitSerializer, ExpenseSerializer, FinanceCategorySerializer, TaskCategorySerializer,
     TaskSerializer, NoteSerializer,
     QuadrantSerializer, QuadrantTaskSerializer,
+    ThoughtSerializer,
 )
 
 def health(request):
@@ -221,6 +222,36 @@ class QuadrantTaskViewSet(viewsets.ModelViewSet):
             f"QuadrantTaskViewSet.perform_create: user={self.request.user}, "
             f"is_authenticated={self.request.user.is_authenticated}"
         )
+        if self.request.user.is_authenticated:
+            serializer.save(user=self.request.user)
+        else:
+            raise PermissionError("User not authenticated")
+
+
+class ThoughtViewSet(viewsets.ModelViewSet):
+    """CRUD for banner thoughts."""
+
+    serializer_class = ThoughtSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return Thought.objects.none()
+
+        qs = Thought.objects.filter(user=self.request.user)
+
+        category = self.request.query_params.get('category')
+        if category:
+            qs = qs.filter(category=category)
+
+        # Only show active thoughts by default
+        active = self.request.query_params.get('active')
+        if active is None or str(active).lower() in ['1', 'true', 'yes', 'on']:
+            qs = qs.filter(is_active=True)
+
+        return qs
+
+    def perform_create(self, serializer):
         if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
         else:

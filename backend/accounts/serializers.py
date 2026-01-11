@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Habit, Expense, FinanceCategory, TaskCategory, Task, Note, Quadrant, QuadrantTask
+from .models import Habit, Expense, FinanceCategory, TaskCategory, Task, Note, Quadrant, QuadrantTask, Thought
 
 
 class HabitSerializer(serializers.ModelSerializer):
@@ -61,3 +61,10 @@ class QuadrantTaskSerializer(serializers.ModelSerializer):
         model = QuadrantTask
         fields = ['id', 'quadrant', 'text', 'deadline', 'time', 'completed', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class ThoughtSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Thought
+        fields = ['id', 'category', 'text', 'is_active', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']

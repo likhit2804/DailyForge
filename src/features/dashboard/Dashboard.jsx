@@ -1,11 +1,43 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAppContext } from '../../context/AppContext';
 import EmptyState from '../../shared/components/EmptyState';
 import '../../styles.css'; // Import shared CSS
 
+const MODE_STORAGE_KEY = 'dailyforge.thoughtMode';
+
+const MODE_OPTIONS = [
+  { id: 'all', label: 'All' },
+  { id: 'motivational', label: 'Motivational' },
+  { id: 'focus', label: 'Focus' },
+  { id: 'calm', label: 'Calm' },
+  { id: 'gratitude', label: 'Gratitude' },
+  { id: 'confidence', label: 'Confidence' },
+  { id: 'custom', label: 'Custom' },
+];
+
 const Dashboard = () => {
   const { habits, expenses, categories, tasks, graphSpan, setGraphSpan, filterBySpan, totalExpenses, avgStreak } = useAppContext();
+
+  const modeOptions = useMemo(() => MODE_OPTIONS, []);
+  const [thoughtMode, setThoughtMode] = useState(() => {
+    try {
+      return localStorage.getItem(MODE_STORAGE_KEY) || 'all';
+    } catch {
+      return 'all';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(MODE_STORAGE_KEY, thoughtMode || 'all');
+    } catch {
+      // ignore
+    }
+    window.dispatchEvent(new CustomEvent('thoughts:modeChanged', { detail: { mode: thoughtMode || 'all' } }));
+    // Force an immediate banner refresh when mode changes
+    window.dispatchEvent(new CustomEvent('thoughts:updated', { detail: { mode: thoughtMode || 'all' } }));
+  }, [thoughtMode]);
 
   // Calculate dynamic stats based on graphSpan
   const filteredExpenses = filterBySpan(expenses);
@@ -69,6 +101,33 @@ const Dashboard = () => {
               >
                 All
               </button>
+            </div>
+          </div>
+
+          {/* Affirmations banner mode picker (outside banner) */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: '#6b7280', fontWeight: 700 }}>Affirmations mode:</span>
+            <div
+              role="tablist"
+              aria-label="Affirmations mode"
+              style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}
+            >
+              {modeOptions.map(opt => {
+                const active = thoughtMode === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setThoughtMode(opt.id)}
+                    className={`btn btn-sm ${active ? 'btn-custom-primary' : 'btn-outline-primary'}`}
+                    style={{ borderRadius: 999 }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

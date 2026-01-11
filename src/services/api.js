@@ -258,6 +258,25 @@ export const deleteNote = async (noteId) => {
   return request('DELETE', `notes/${noteId}/`);
 };
 
+// Thoughts (banner content)
+export const getThoughts = async ({ category } = {}) => {
+  const qs = category ? `?category=${encodeURIComponent(category)}` : '';
+  const docs = await request('GET', `thoughts/${qs}`);
+  return Array.isArray(docs) ? docs : [];
+};
+
+export const createThought = async (thoughtData) => {
+  return request('POST', 'thoughts/', thoughtData);
+};
+
+export const updateThought = async (thoughtId, thoughtData) => {
+  return request('PATCH', `thoughts/${thoughtId}/`, thoughtData);
+};
+
+export const deleteThought = async (thoughtId) => {
+  return request('DELETE', `thoughts/${thoughtId}/`);
+};
+
 // Default export aggregating all API helpers for existing imports
 const api = {
   register,
@@ -294,6 +313,10 @@ const api = {
   createNote,
   updateNote,
   deleteNote,
+  getThoughts,
+  createThought,
+  updateThought,
+  deleteThought,
 };
 
 export default api;

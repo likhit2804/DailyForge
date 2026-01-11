@@ -8,8 +8,10 @@ import Habits from './features/habits/Habits';
 import Expenses from './features/expenses/Expenses';
 import Todo from './features/tasks/Todo';
 import Notes from './features/notes/Notes';
+import Thoughts from './features/thoughts/Thoughts';
 import SignIn from './features/auth/SignIn';
 import Register from './features/auth/Register';
+import ThoughtBanner from './shared/components/ThoughtBanner';
 
 const ProductivityApp = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -24,6 +26,7 @@ const ProductivityApp = () => {
     { id: 'expenses', label: 'Finance', icon: '💰' },
     { id: 'quadrants', label: 'Priority', icon: '🎯' },
     { id: 'notes', label: 'Notes', icon: '📒' },
+    { id: 'thoughts', label: 'Affirmations', icon: '💡' },
   ];
 
   useEffect(() => {
@@ -200,6 +203,9 @@ const ProductivityApp = () => {
           </div>
         </div>
 
+        {/* Global banner (visible on all authenticated pages) */}
+        <ThoughtBanner onManage={() => handleSetActiveTab('thoughts')} />
+
         {/* Content card */}
         <div className="content-card">
           {activeTab === 'dashboard' && <Dashboard />}
@@ -208,6 +214,7 @@ const ProductivityApp = () => {
           {activeTab === 'expenses' && <Expenses />}
           {activeTab === 'todo' && <Todo />}
           {activeTab === 'notes' && <Notes />}
+          {activeTab === 'thoughts' && <Thoughts />}
         </div>
       </main>
 

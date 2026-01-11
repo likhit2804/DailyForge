@@ -4,13 +4,18 @@ import os
 import sys
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(BASE_DIR))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+BACKEND_DIR = Path(__file__).resolve().parent
+
+# Ensure backend apps (e.g. `accounts`) are importable in all environments.
+# Putting BACKEND_DIR first makes imports resolve to the inner Django project package.
+sys.path.insert(0, str(BACKEND_DIR))
+sys.path.insert(1, str(PROJECT_ROOT))
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.backend.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

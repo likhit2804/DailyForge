@@ -130,3 +130,29 @@ class QuadrantTask(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class Thought(models.Model):
+    """Short text snippets shown in the global banner, grouped by category/mood."""
+
+    CATEGORY_CHOICES = [
+        ('motivational', 'Motivational'),
+        ('focus', 'Focus'),
+        ('calm', 'Calm'),
+        ('gratitude', 'Gratitude'),
+        ('confidence', 'Confidence'),
+        ('custom', 'Custom'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='thoughts')
+    category = models.CharField(max_length=32, choices=CATEGORY_CHOICES, default='motivational')
+    text = models.TextField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.category}: {self.text[:40]}"
+
+    class Meta:
+        ordering = ['-updated_at']

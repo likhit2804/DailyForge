@@ -91,6 +91,113 @@
   justify-content: space-between;
   align-items: center;
 }
+
+/* Thought / Banner (global, under topbar) */
+.thought-banner {
+  background: linear-gradient(135deg, #eef2ff, #ecfeff);
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.thought-banner.collapsed {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.thought-banner .tb-left {
+  min-width: 0;
+}
+
+.thought-banner .tb-center {
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.thought-banner .tb-kicker {
+  font-size: 11px;
+  color: #4b5563;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.thought-banner .tb-text {
+  font-size: 16px;
+  color: #111827;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  animation: tbPop 220ms ease-out;
+}
+
+@keyframes tbPop {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.thought-banner .tb-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.thought-banner .tb-chip {
+  font-size: 12px;
+  font-weight: 800;
+  color: #111827;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(199, 210, 254, 0.9);
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.thought-banner .tb-select {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: #ffffff;
+  color: #111827;
+  font-weight: 600;
+}
+
+.thought-banner .tb-btn {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: #ffffff;
+  color: #111827;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.thought-banner .tb-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.thought-banner .tb-btn.primary {
+  border-color: #a5b4fc;
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+.thought-banner .tb-btn.danger {
+  border-color: #fecaca;
+  color: #b91c1c;
+}
 .tb-title { font-size: 20px; font-weight: 700; color: #111827; margin: 0; }
 .tb-sub { font-size: 12px; color: #6b7280; margin: 2px 0 0; }
 .tb-right { display: flex; gap: 16px; }
