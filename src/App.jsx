@@ -15,6 +15,7 @@ const ProductivityApp = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { isAuthenticated, authLoading, logout, currentUser } = useAppContext();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   const menu = [
     { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -71,9 +72,25 @@ const ProductivityApp = () => {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, [isAuthenticated, authLoading]);
 
+  // Track small screens and auto-collapse sidebar for mobile/tablet
+  useEffect(() => {
+    const handleResize = () => {
+      const small = window.innerWidth <= 768;
+      setIsSmallScreen(small);
+      if (small) setIsSidebarOpen(false);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleSetActiveTab = (id) => {
     setActiveTab(id);
     if (window.location.hash.replace('#', '') !== id) window.location.hash = id;
+    // Close sidebar on mobile when tab is selected
+    if (isSmallScreen) {
+      setIsSidebarOpen(false);
+    }
   };
 
   if (activeTab === 'signin' || activeTab === 'register') {
@@ -88,6 +105,13 @@ const ProductivityApp = () => {
 
   return (
     <div className={`new-layout ${isSidebarOpen ? '' : 'collapsed'}`}>
+      {/* Mobile backdrop overlay */}
+      {isSmallScreen && isSidebarOpen && (
+        <div 
+          className="sidebar-backdrop" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
       {/* Sidebar */}
       <aside className={`sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
         <div className="sidebar-header">
@@ -118,6 +142,17 @@ const ProductivityApp = () => {
       <main className="main">
         {/* Topbar with User Switcher */}
         <div className="topbar">
+          {/* small-screen menu trigger placed in topbar for easy access */}
+          {isSmallScreen && (
+            <button
+              className="menu-trigger topbar-trigger"
+              aria-expanded={isSidebarOpen}
+              onClick={() => setIsSidebarOpen(s => !s)}
+              style={{ marginRight: 12 }}
+            >
+              ☰
+            </button>
+          )}
           <div className="tb-left">
             <h1 className="tb-title">Task Management</h1>
             <p className="tb-sub">Per-user data • Local</p>

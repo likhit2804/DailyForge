@@ -393,12 +393,12 @@ const Notes = () => {
 
   return (
     <div style={{
-      height: 'calc(100vh - 250px)',
+      minHeight: 'calc(100vh - 250px)',
       width: '100%',
       display: 'grid',
-      gridTemplateColumns: '300px 1fr',
-      gap: '16px',
-      padding: '16px',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+      gap: 'clamp(12px, 2vw, 16px)',
+      padding: 'clamp(8px, 2vw, 16px)',
       backgroundColor: '#f8f9fa'
     }}>
 
@@ -654,12 +654,12 @@ const Notes = () => {
       }}>
         {/* Header with Filters */}
         <div style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h3 style={{fontSize: '18px', fontWeight: 'bold', margin: 0, display: 'flex', alignItems: 'center', gap: '8px'}}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+            <h3 style={{fontSize: 'clamp(14px, 3vw, 18px)', fontWeight: 'bold', margin: 0, display: 'flex', alignItems: 'center', gap: '8px'}}>
               <span>📝</span> Notes
             </h3>
             
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
               <input
                 type="text"
                 placeholder="Search notes..."
@@ -670,7 +670,7 @@ const Notes = () => {
                   borderRadius: '6px',
                   border: '1px solid #e0e0e0',
                   fontSize: '13px',
-                  width: '200px'
+                  width: 'clamp(140px, 30vw, 200px)'
                 }}
               />
               
@@ -699,8 +699,8 @@ const Notes = () => {
           flex: 1,
           overflow: 'auto',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-          gap: '16px',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))',
+          gap: 'clamp(10px, 2vw, 16px)',
           alignContent: 'start'
         }}>
           {filteredNotes.length > 0 ? (

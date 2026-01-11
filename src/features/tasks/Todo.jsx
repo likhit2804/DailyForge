@@ -328,21 +328,21 @@ const CustomCategoryToDo = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8f9fa', padding: '24px' }}>
+    <div style={{ minHeight: '100vh', background: '#f8f9fa', padding: 'clamp(12px, 3vw, 24px)' }}>
       <div style={{ width: '100%', maxWidth: '2000px', margin: '0 auto' }}>
         {/* Header */}
-        <div className="section-card" style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div className="section-card" style={{ marginBottom: 'clamp(12px, 3vw, 24px)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <div>
-              <h1 style={{ fontSize: '32px', fontWeight: '800', margin: '0 0 8px 0', color: '#1f2937' }}>
+              <h1 style={{ fontSize: 'clamp(20px, 4vw, 32px)', fontWeight: '800', margin: '0 0 8px 0', color: '#1f2937' }}>
                 📝 Custom Lists
               </h1>
-              <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+              <p style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#6b7280', margin: 0 }}>
                 Organize anything with custom categories
               </p>
             </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <div style={{ display: 'flex', gap: '6px', background: '#f3f4f6', padding: '4px', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '6px', background: '#f3f4f6', padding: '4px', borderRadius: '8px', flexWrap: 'wrap' }}>
                 {['all', 'active', 'completed'].map(filter => (
                   <button
                     key={filter}
@@ -500,8 +500,8 @@ const CustomCategoryToDo = () => {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
-          gap: '20px'
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
+          gap: 'clamp(12px, 3vw, 20px)'
         }}>
           {categories.map(category => {
             const stats = getTaskCategoryStats(category.id);

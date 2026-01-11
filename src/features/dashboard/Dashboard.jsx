@@ -27,19 +27,19 @@ const Dashboard = () => {
   }));
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8f9fa', padding: '24px' }}>
+    <div style={{ minHeight: '100vh', background: '#f8f9fa', padding: 'clamp(12px, 3vw, 24px)' }}>
       <div style={{ width: '100%', maxWidth: '2000px', margin: '0 auto' }}>
-        <div className="section-card" style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div className="section-card" style={{ marginBottom: 'clamp(12px, 3vw, 24px)' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <div>
-              <h1 style={{ fontSize: '32px', fontWeight: '800', margin: '0 0 8px 0', color: '#1f2937' }}>
+              <h1 style={{ fontSize: 'clamp(20px, 4vw, 32px)', fontWeight: '800', margin: '0 0 8px 0', color: '#1f2937' }}>
                 📊 Dashboard
               </h1>
-              <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+              <p style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#6b7280', margin: 0 }}>
                 Overview of your habits and expenses
               </p>
             </div>
-            <div className="d-flex gap-2 align-items-center">
+            <div className="d-flex gap-2 align-items-center flex-wrap">
               <span style={{ fontSize: '12px', color: '#6b7280' }}>Time period:</span>
               <button
                 type="button"
@@ -73,61 +73,48 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="row g-3 mb-4">
-          <div className="col-md-4">
-            <div className="stat-card shadow h-100">
-              <div className="card-body text-center">
-                <p className="stat-label mb-2">Current Streak</p>
-                <div className="stat-value">{thisPeriodAvgStreak}</div>
-                <p className="stat-sublabel">days average</p>
-              </div>
+        {/* Stats Grid - 2x3 or 3x2 responsive */}
+        <div className="dashboard-stats-grid mb-4">
+          <div className="stat-card shadow h-100">
+            <div className="card-body text-center">
+              <p className="stat-label mb-2">Current Streak</p>
+              <div className="stat-value">{thisPeriodAvgStreak}</div>
+              <p className="stat-sublabel">days average</p>
             </div>
           </div>
-          <div className="col-md-4">
-            <div className="stat-card shadow h-100">
-              <div className="card-body text-center">
-                <p className="stat-label mb-2">This Period</p>
-                <div className="stat-value">₹{thisPeriodExpenses}</div>
-                <p className="stat-sublabel">net expenses</p>
-              </div>
+          <div className="stat-card shadow h-100">
+            <div className="card-body text-center">
+              <p className="stat-label mb-2">This Period</p>
+              <div className="stat-value">₹{thisPeriodExpenses}</div>
+              <p className="stat-sublabel">net expenses</p>
             </div>
           </div>
-          <div className="col-md-4">
-            <div className="stat-card shadow h-100">
-              <div className="card-body text-center">
-                <p className="stat-label mb-2">Habits Tracked</p>
-                <div className="stat-value">{thisPeriodHabits}</div>
-                <p className="stat-sublabel">total habits</p>
-              </div>
+          <div className="stat-card shadow h-100">
+            <div className="card-body text-center">
+              <p className="stat-label mb-2">Habits Tracked</p>
+              <div className="stat-value">{thisPeriodHabits}</div>
+              <p className="stat-sublabel">total habits</p>
             </div>
           </div>
-        </div>
-        <div className="row g-3 mb-4">
-          <div className="col-md-4">
-            <div className="stat-card shadow h-100">
-              <div className="card-body text-center">
-                <p className="stat-label mb-2">Most Expensive Category</p>
-                <div className="stat-value" style={{ fontSize: '20px' }}>{mostExpensiveCategory}</div>
-                <p className="stat-sublabel">in selected period</p>
-              </div>
+          <div className="stat-card shadow h-100">
+            <div className="card-body text-center">
+              <p className="stat-label mb-2">Most Expensive Category</p>
+              <div className="stat-value" style={{ fontSize: '20px' }}>{mostExpensiveCategory}</div>
+              <p className="stat-sublabel">in selected period</p>
             </div>
           </div>
-          <div className="col-md-4">
-            <div className="stat-card shadow h-100">
-              <div className="card-body text-center">
-                <p className="stat-label mb-2">Longest Habit Streak</p>
-                <div className="stat-value">{longestHabitStreak}</div>
-                <p className="stat-sublabel">best streak (days)</p>
-              </div>
+          <div className="stat-card shadow h-100">
+            <div className="card-body text-center">
+              <p className="stat-label mb-2">Longest Habit Streak</p>
+              <div className="stat-value">{longestHabitStreak}</div>
+              <p className="stat-sublabel">best streak (days)</p>
             </div>
           </div>
-          <div className="col-md-4">
-            <div className="stat-card shadow h-100">
-              <div className="card-body text-center">
-                <p className="stat-label mb-2">Matrix Tasks</p>
-                <div className="stat-value">{tasksAdded}</div>
-                <p className="stat-sublabel">total across quadrants</p>
-              </div>
+          <div className="stat-card shadow h-100">
+            <div className="card-body text-center">
+              <p className="stat-label mb-2">Matrix Tasks</p>
+              <div className="stat-value">{tasksAdded}</div>
+              <p className="stat-sublabel">total across quadrants</p>
             </div>
           </div>
         </div>
@@ -141,21 +128,22 @@ const Dashboard = () => {
             {habits.length === 0 ? (
               <EmptyState icon="✨" title="No habits yet" subtitle="Add habits to start tracking your progress." actionLabel="Add Habit" />
             ) : (
-              habits.slice(0, 3).map(habit => (
-                <div key={habit.id} className="task-item p-3 mb-2 rounded">
-                  <div>
-                    <h3 className="h5 mb-1">{habit.name}</h3>
-                    <p className="habit-streak mb-0">🔥 {habit.streak ?? 0} day streak</p>
+              habits.slice(0, 3).map(habit => {
+                // Calculate fraction for today: completed/total
+                const total = habit.completed.length;
+                const done = habit.completed.filter(Boolean).length;
+                return (
+                  <div key={habit.id} className="task-item p-3 mb-2 rounded">
+                    <div>
+                      <h3 className="h5 mb-1">{habit.name}</h3>
+                      <p className="habit-streak mb-0">🔥 {habit.streak ?? 0} day streak</p>
+                    </div>
+                    <div style={{ fontWeight: 600, fontSize: 15, color: '#4f46e5' }}>
+                      {done} / {total} days
+                    </div>
                   </div>
-                  <div className="d-flex gap-1">
-                    {habit.completed.map((done, i) => (
-                      <div key={i} className={`habit-day ${done ? 'completed' : ''}`}>
-                        {done ? '✓' : '—'}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

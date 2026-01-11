@@ -168,15 +168,21 @@ useEffect(() => {
 
   return (
     <div style={{
-      height: 'calc(100vh - 250px)',
+      minHeight: 'calc(100vh - 250px)',
       width: '100%',
-      display: 'grid',
-      gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)',
-      gridTemplateRows: 'auto 1fr',
-      gap: 'clamp(12px, 2vw, 20px)',
-      padding: 'clamp(8px, 2vw, 20px)',
-      backgroundColor: '#f8f9fa'
+      backgroundColor: '#f8f9fa',
+      display: 'flex',
+      justifyContent: 'center',
     }}>
+      <div
+        className="expenses-main-grid-responsive"
+        style={{
+          width: '100%',
+          gap: 'clamp(12px, 2vw, 20px)',
+          padding: 'clamp(8px, 2vw, 20px)'
+        }}
+      >
+
       {/* Header */}
       <div className="section-card" style={{ gridColumn: '1 / -1', marginBottom: 'clamp(8px, 2vw, 16px)' }}>
         <div className="d-flex justify-content-between align-items-center mb-4">
@@ -189,17 +195,19 @@ useEffect(() => {
         
         <div className="mb-3">
           <label className="form-label fw-bold">Time Period</label>
-          <div className="d-flex gap-2 mb-2">
+          <div className="d-flex gap-2 mb-2 flex-wrap">
             <button type="button" className={`btn ${graphSpan === 'week' ? 'btn-custom-primary' : 'btn-outline-primary'} btn-sm`} onClick={() => setGraphSpan('week')}>Week</button>
             <button type="button" className={`btn ${graphSpan === 'month' ? 'btn-custom-primary' : 'btn-outline-primary'} btn-sm`} onClick={() => setGraphSpan('month')}>Month</button>
             <button type="button" className={`btn ${graphSpan === 'year' ? 'btn-custom-primary' : 'btn-outline-primary'} btn-sm`} onClick={() => setGraphSpan('year')}>Year</button>
             <button type="button" className={`btn ${graphSpan === 'all' ? 'btn-custom-primary' : 'btn-outline-primary'} btn-sm`} onClick={() => setGraphSpan('all')}>All</button>
             <button type="button" className={`btn ${graphSpan === 'custom' ? 'btn-custom-primary' : 'btn-outline-primary'} btn-sm`} onClick={() => setGraphSpan('custom')}>Custom</button>
+          </div>
+          <div className="d-flex gap-2 flex-wrap">
             {graphSpan === 'custom' && (
-              <input type="date" className="form-control form-control-sm" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} placeholder="Start Date" />
+              <input type="date" className="form-control form-control-sm" style={{maxWidth: '160px'}} value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} placeholder="Start Date" />
             )}
             {graphSpan === 'custom' && (
-              <input type="date" className="form-control form-control-sm" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} placeholder="End Date" />
+              <input type="date" className="form-control form-control-sm" style={{maxWidth: '160px'}} value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} placeholder="End Date" />
             )}
             <button className="btn btn-custom-primary btn-sm" onClick={() => setShowAddExpenseModal(true)}>➕ Add Expense</button>
             <button className="btn btn-custom-secondary btn-sm" onClick={() => setShowAddCategoryModal(true)}>🏷️ Add Category</button>
@@ -208,17 +216,18 @@ useEffect(() => {
       </div>
 
       {/* Left Column - Analytics */}
-      <div className="section-card" style={{ overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 'clamp(16px, 3vw, 24px)' }}>
+      <div className="section-card" style={{ overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'clamp(16px, 3vw, 24px)' }}>
         {/* Left Analytics - Stats */}
         <div>
           <h3 style={{fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px'}}>
             <span>📊</span> Analytics
           </h3>
           
-          {/* Stats Grid - 2x2 */}
+          {/* Stats Grid - always 2x2 */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gridTemplateColumns: '1fr 1fr',
+            gridTemplateRows: '1fr 1fr',
             gap: 'clamp(8px, 1.5vw, 12px)',
             marginBottom: 'clamp(12px, 2vw, 20px)'
           }}>
@@ -429,7 +438,7 @@ useEffect(() => {
           ) : (
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(160px, 20vw, 200px), 1fr))',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
               gap: 'clamp(8px, 1.5vw, 16px)'
             }}>
               {filteredAndSortedExpenses.map(expense => {
@@ -701,6 +710,7 @@ useEffect(() => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

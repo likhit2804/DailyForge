@@ -85,13 +85,13 @@ const Habits = () => {
 
   return (
     <div style={{
-      height: 'calc(100vh - 250px)',
+      minHeight: 'calc(100vh - 250px)',
       width: '100%',
       display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gridTemplateRows: 'auto 1fr',
-      gap: '16px',
-      padding: '16px',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+      gridTemplateRows: 'auto',
+      gap: 'clamp(12px, 2vw, 16px)',
+      padding: 'clamp(8px, 2vw, 16px)',
       backgroundColor: '#f8f9fa'
     }}>
 
@@ -254,7 +254,7 @@ const Habits = () => {
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         overflow: 'auto'
       }}>
-        <HabitGrid habits={habits} setHabits={setHabits} />
+        <HabitGrid habits={habitsWithStreaks} setHabits={setHabits} />
       </div>
     </div>
   );

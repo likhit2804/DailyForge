@@ -251,9 +251,9 @@ const QuadrantsSplitLayout = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100vh', padding: '16px', boxSizing: 'border-box' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 2vw, 16px)', minHeight: '100vh', padding: 'clamp(8px, 2vw, 16px)', boxSizing: 'border-box' }}>
       {/* Compact Top Section - Analytics & Add Task */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'clamp(12px, 2vw, 16px)' }}>
         {/* Analytics Dashboard - Compact */}
         <div style={{
           background: '#667eea',
@@ -291,7 +291,7 @@ const QuadrantsSplitLayout = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
+          <div className="task-overview-grid-responsive">
             {[
               { label: 'Total', value: taskStats.total, icon: '📝' },
               { label: 'Done', value: taskStats.completed, icon: '✅' },
@@ -418,14 +418,16 @@ const QuadrantsSplitLayout = () => {
       </div>
 
       {/* Bottom Section - Quadrants Grid - Now takes most space */}
-      <div style={{
-        flex: 1,
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '16px',
-        minHeight: 0,
-        overflow: 'hidden'
-      }}>
+      <div
+        className="quadrants-grid-responsive"
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflow: 'auto',
+          display: 'grid',
+          gap: 'clamp(12px, 2vw, 16px)'
+        }}
+      >
         {quadrantConfig.map(({ key, title, subtitle, icon, color, lightColor, gradient, description }) => (
           <div
             key={key}
