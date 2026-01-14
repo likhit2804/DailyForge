@@ -4,12 +4,12 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Habit, Expense, FinanceCategory,Task, TaskCategory, Note, Quadrant, QuadrantTask, Thought
+from .models import Habit, Expense, FinanceCategory,Task, TaskCategory, Note, Quadrant, QuadrantTask, Thought, Achievement
 from .serializers import (
     HabitSerializer, ExpenseSerializer, FinanceCategorySerializer, TaskCategorySerializer,
     TaskSerializer, NoteSerializer,
     QuadrantSerializer, QuadrantTaskSerializer,
-    ThoughtSerializer,
+    ThoughtSerializer, AchievementSerializer,
 )
 
 def health(request):
@@ -250,6 +250,29 @@ class ThoughtViewSet(viewsets.ModelViewSet):
             qs = qs.filter(is_active=True)
 
         return qs
+
+    def perform_create(self, serializer):
+        if self.request.user.is_authenticated:
+            serializer.save(user=self.request.user)
+        else:
+            raise PermissionError("User not authenticated")
+
+
+class AchievementViewSet(viewsets.ModelViewSet):
+    """CRUD for user achievements with calendar filtering client-side."""
+
+    serializer_class = AchievementSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return Achievement.objects.none()
+
+        queryset = Achievement.objects.filter(user=self.request.user)
+        date_param = self.request.query_params.get('date')
+        if date_param:
+            queryset = queryset.filter(date_earned=date_param)
+        return queryset
 
     def perform_create(self, serializer):
         if self.request.user.is_authenticated:

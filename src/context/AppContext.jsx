@@ -4,6 +4,16 @@ import api from '../services/api';
 
 const AppContext = createContext();
 
+// Helper to format date as local YYYY-MM-DD without timezone shift
+const formatDateLocal = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {
@@ -29,6 +39,8 @@ export const AppProvider = ({ children }) => {
   const [taskCategories, setTaskCategories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [notes, setNotes] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [achievementCategories, setAchievementCategories] = useState([]);
   const [graphSpan, setGraphSpan] = useState('month');
   // Period navigation state for habits (shared across components)
   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = last week
@@ -43,6 +55,27 @@ export const AppProvider = ({ children }) => {
   };
 
   // Helper to filter by time span
+  const deriveAchievementCategories = useCallback((items = []) => {
+    const unique = Array.from(new Set(items.map(item => (item.category || '').trim()).filter(Boolean)));
+    return unique.length ? unique : ['General'];
+  }, []);
+
+  const normalizeAchievement = useCallback((doc = {}) => {
+    const dateEarnedRaw = doc.dateEarned || doc.date_earned;
+    const isoDate = dateEarnedRaw
+      ? new Date(dateEarnedRaw).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0];
+    return {
+      id: doc.id,
+      title: doc.title || 'Untitled Achievement',
+      description: doc.description || '',
+      category: doc.category || '',
+      dateEarned: isoDate,
+      createdAt: doc.createdAt || doc.created_at,
+      updatedAt: doc.updatedAt || doc.updated_at,
+    };
+  }, []);
+
   const filterBySpan = (arr, dateKey = 'date') => {
     const now = new Date();
     if (graphSpan === 'week') {
@@ -67,6 +100,14 @@ export const AppProvider = ({ children }) => {
     }
     return arr;
   };
+
+  const filterAchievementsByDate = useCallback((date) => {
+    if (!date) return [];
+    const isoTarget = typeof date === 'string'
+      ? date
+      : formatDateLocal(date);
+    return achievements.filter(item => item.dateEarned === isoTarget);
+  }, [achievements]);
 
   // Mark task complete
   const markTaskComplete = (quadrant, taskId) => {
@@ -175,6 +216,8 @@ export const AppProvider = ({ children }) => {
       setFinanceCategories([]);
       setTaskCategories([]);
       setNotes([]);
+      setAchievements([]);
+      setAchievementCategories([]);
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -185,10 +228,11 @@ export const AppProvider = ({ children }) => {
     let mounted = true;
     async function load() {
       try {
-        const [hb, ex, nt] = await Promise.allSettled([
+        const [hb, ex, nt, ac] = await Promise.allSettled([
           api.getHabits(),
           api.getExpenses(),
-          api.getNotes()
+          api.getNotes(),
+          api.getAchievements(),
         ]);
 
         console.log('📦 reloadAll Promise.allSettled results:', { hb, ex, nt });
@@ -236,6 +280,12 @@ export const AppProvider = ({ children }) => {
         if (mounted && nt.status === 'fulfilled') {
           console.log('✅ reloadAll: notes from API:', nt.value);
           setNotes(Array.isArray(nt.value) ? nt.value : []);
+        }
+
+        if (mounted && ac.status === 'fulfilled') {
+          const mapped = (Array.isArray(ac.value) ? ac.value : []).map(normalizeAchievement);
+          setAchievements(mapped);
+          setAchievementCategories(deriveAchievementCategories(mapped));
         }
       } catch (err) {
         // ignore - keep defaults
@@ -515,6 +565,63 @@ export const AppProvider = ({ children }) => {
     try { await api.deleteNote(noteId); } catch (err) { console.warn(err); }
   };
 
+  const addAchievementRemote = async (achievement) => {
+    try {
+      const payload = {
+        title: achievement.title,
+        description: achievement.description || '',
+        category: achievement.category || '',
+        date_earned: achievement.dateEarned || achievement.date_earned,
+      };
+      const created = await api.createAchievement(payload);
+      const normalized = normalizeAchievement(created);
+      setAchievements(prev => {
+        const next = [...prev, normalized];
+        setAchievementCategories(deriveAchievementCategories(next));
+        return next;
+      });
+      return normalized;
+    } catch (err) {
+      console.warn('addAchievementRemote error', err);
+      return null;
+    }
+  };
+
+  const updateAchievementRemote = async (achievementId, payload) => {
+    try {
+      const updateData = {
+        title: payload.title,
+        description: payload.description || '',
+        category: payload.category || '',
+        date_earned: payload.dateEarned || payload.date_earned,
+      };
+      const updated = await api.updateAchievement(achievementId, updateData);
+      const normalized = normalizeAchievement({ ...updated, id: achievementId });
+      setAchievements(prev => {
+        const next = prev.map(item => (item.id === achievementId ? normalized : item));
+        setAchievementCategories(deriveAchievementCategories(next));
+        return next;
+      });
+      return normalized;
+    } catch (err) {
+      console.warn('updateAchievementRemote error', err);
+      return null;
+    }
+  };
+
+  const deleteAchievementRemote = async (achievementId) => {
+    setAchievements(prev => {
+      const next = prev.filter(item => item.id !== achievementId);
+      setAchievementCategories(deriveAchievementCategories(next));
+      return next;
+    });
+    try {
+      await api.deleteAchievement(achievementId);
+    } catch (err) {
+      console.warn('deleteAchievementRemote error', err);
+    }
+  };
+
   // Category helpers
   const saveFinanceCategoriesRemote = async (cats) => {
     try {
@@ -722,6 +829,10 @@ export const AppProvider = ({ children }) => {
     setCategories,
     notes,
     setNotes,
+    achievements,
+    setAchievements,
+    achievementCategories,
+    setAchievementCategories,
     graphSpan,
     setGraphSpan,
     weekOffset,
@@ -747,6 +858,10 @@ export const AppProvider = ({ children }) => {
     addNoteRemote,
     updateNoteRemote,
     deleteNoteRemote,
+    addAchievementRemote,
+    updateAchievementRemote,
+    deleteAchievementRemote,
+    filterAchievementsByDate,
     // Categories
     saveFinanceCategoriesRemote,
     saveCategoriesRemote,

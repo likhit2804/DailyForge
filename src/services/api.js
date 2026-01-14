@@ -258,6 +258,24 @@ export const deleteNote = async (noteId) => {
   return request('DELETE', `notes/${noteId}/`);
 };
 
+// Achievements
+export const getAchievements = async (date = null) => {
+  const endpoint = date ? `achievements/?date=${date}` : 'achievements/';
+  return request('GET', endpoint);
+};
+
+export const createAchievement = async (achievementData) => {
+  return request('POST', 'achievements/', achievementData);
+};
+
+export const updateAchievement = async (achievementId, achievementData) => {
+  return request('PATCH', `achievements/${achievementId}/`, achievementData);
+};
+
+export const deleteAchievement = async (achievementId) => {
+  return request('DELETE', `achievements/${achievementId}/`);
+};
+
 // Thoughts (banner content)
 export const getThoughts = async ({ category } = {}) => {
   const qs = category ? `?category=${encodeURIComponent(category)}` : '';

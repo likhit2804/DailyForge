@@ -11,6 +11,7 @@ from .views import (
     QuadrantViewSet,
     QuadrantTaskViewSet,
     ThoughtViewSet,
+    AchievementViewSet,
 )
 from .auth_views import register, login_view, logout_view, current_user, csrf_token
 
@@ -24,6 +25,7 @@ router.register('notes', NoteViewSet, basename='note')
 router.register('quadrants', QuadrantViewSet, basename='quadrant')  # quadrant configs (optional)
 router.register('quadrant-tasks', QuadrantTaskViewSet, basename='quadrant-task')  # Eisenhower tasks
 router.register('thoughts', ThoughtViewSet, basename='thought')  # banner thoughts
+router.register('achievements', AchievementViewSet, basename='achievement')  # progress tracker
 
 urlpatterns = [
     path('health/', health, name='api-health'),

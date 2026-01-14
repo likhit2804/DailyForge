@@ -9,6 +9,7 @@ import Expenses from './features/expenses/Expenses';
 import Todo from './features/tasks/Todo';
 import Notes from './features/notes/Notes';
 import Thoughts from './features/thoughts/Thoughts';
+import Achievements from './features/achievements/Achievements';
 import SignIn from './features/auth/SignIn';
 import Register from './features/auth/Register';
 import ThoughtBanner from './shared/components/ThoughtBanner';
@@ -26,6 +27,7 @@ const ProductivityApp = () => {
     { id: 'expenses', label: 'Finance', icon: '💰' },
     { id: 'quadrants', label: 'Priority', icon: '🎯' },
     { id: 'notes', label: 'Notes', icon: '📒' },
+     { id: 'achievements', label: 'Accomplishments', icon: '🏆' },
     { id: 'thoughts', label: 'Affirmations', icon: '💡' },
   ];
 
@@ -214,6 +216,7 @@ const ProductivityApp = () => {
           {activeTab === 'expenses' && <Expenses />}
           {activeTab === 'todo' && <Todo />}
           {activeTab === 'notes' && <Notes />}
+          {activeTab === 'achievements' && <Achievements />}
           {activeTab === 'thoughts' && <Thoughts />}
         </div>
       </main>

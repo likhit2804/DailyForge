@@ -156,3 +156,21 @@ class Thought(models.Model):
 
     class Meta:
         ordering = ['-updated_at']
+
+
+class Achievement(models.Model):
+    """Represents a user milestone that can be filtered by calendar date."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='achievements')
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    date_earned = models.DateField()
+    category = models.CharField(max_length=120, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title} ({self.date_earned})"
+
+    class Meta:
+        ordering = ['-date_earned', '-created_at']

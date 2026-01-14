@@ -1,5 +1,16 @@
 from rest_framework import serializers
-from .models import Habit, Expense, FinanceCategory, TaskCategory, Task, Note, Quadrant, QuadrantTask, Thought
+from .models import (
+    Habit,
+    Expense,
+    FinanceCategory,
+    TaskCategory,
+    Task,
+    Note,
+    Quadrant,
+    QuadrantTask,
+    Thought,
+    Achievement,
+)
 
 
 class HabitSerializer(serializers.ModelSerializer):
@@ -68,3 +79,14 @@ class ThoughtSerializer(serializers.ModelSerializer):
         model = Thought
         fields = ['id', 'category', 'text', 'is_active', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class AchievementSerializer(serializers.ModelSerializer):
+    dateEarned = serializers.DateField(source='date_earned')
+    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    updatedAt = serializers.DateTimeField(source='updated_at', read_only=True)
+
+    class Meta:
+        model = Achievement
+        fields = ['id', 'title', 'description', 'category', 'dateEarned', 'createdAt', 'updatedAt']
+        read_only_fields = ['id', 'createdAt', 'updatedAt']
